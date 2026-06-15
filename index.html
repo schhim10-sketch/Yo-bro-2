@@ -1,0 +1,206 @@
+ <!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automated Launcher — by Sovan</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      padding: 40px 20px;
+    }
+
+    /* ── Clock ── */
+    .clock-card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 28px 48px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .clock-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #a78bfa;
+      margin-bottom: 10px;
+    }
+
+    .clock-time {
+      font-size: 52px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+
+    .clock-date {
+      font-size: 14px;
+      color: rgba(255,255,255,0.55);
+      margin-top: 8px;
+    }
+
+    /* ── Launcher ── */
+    .launcher-card {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 36px 48px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      width: min(460px, 100%);
+    }
+
+    .launcher-card h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 28px;
+      letter-spacing: 0.5px;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .input-group label {
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+      white-space: nowrap;
+      text-align: right;
+      min-width: 130px;
+    }
+
+    .input-group input {
+      padding: 10px 12px;
+      font-size: 15px;
+      font-weight: 500;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      color: #fff;
+      outline: none;
+      transition: border-color 0.2s;
+      flex: 1;
+    }
+
+    .input-group input:focus { border-color: #a78bfa; }
+
+    input[type="number"] { max-width: 90px; text-align: center; flex: none; }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 24px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn:hover  { opacity: 0.88; }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-tabs    { background: #7c3aed; color: #fff; }
+    .btn-windows { background: #2563eb; color: #fff; }
+
+    /* ── Footer ── */
+    .footer {
+      font-size: 12px;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Clock -->
+  <div class="clock-card">
+    <div class="clock-label">Boston Time</div>
+    <div class="clock-time" id="clock">00:00:00 AM</div>
+    <div class="clock-date" id="date">Loading…</div>
+  </div>
+
+  <!-- Launcher -->
+  <div class="launcher-card">
+    <h1>Automated Launcher</h1>
+
+    <div class="input-group">
+      <label for="url">Website URL:</label>
+      <input type="text" id="url" value="google.com" placeholder="e.g. google.com">
+    </div>
+
+    <div class="input-group">
+      <label for="count">How many to open:</label>
+      <input type="number" id="count" value="5" min="1">
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-tabs"    onclick="openTabs()">Open as Tabs</button>
+      <button class="btn btn-windows" onclick="openWindows()">Open as Windows</button>
+    </div>
+  </div>
+
+  <div class="footer">Made by Sovan</div>
+
+  <script>
+    // ── Clock ──────────────────────────────────────────────
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', {
+        timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+      });
+      document.getElementById('date').textContent = now.toLocaleDateString('en-US', {
+        timeZone: 'America/New_York', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // ── Launcher ───────────────────────────────────────────
+    function getCount() {
+      const n = parseInt(document.getElementById('count').value);
+      return isNaN(n) || n < 1 ? 1 : n;
+    }
+
+    function getUrl() {
+      let url = document.getElementById('url').value.trim();
+      if (!url) return 'https://google.com';
+      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+      return url;
+    }
+
+    function openTabs() {
+      const count = getCount(), url = getUrl();
+      for (let i = 0; i < count; i++) window.open(url, '_blank');
+    }
+
+    function openWindows() {
+      const count = getCount(), url = getUrl();
+      for (let i = 0; i < count; i++) window.open(url, '', 'width=800,height=600');
+    }
+  </script>
+</body>
+</html>
